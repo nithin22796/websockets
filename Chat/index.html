@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Websocket</title>
+    </head>
+    <body>
+        <input type="text" placeholder="Your message" id="text">
+        <button>Send Button</button>
+        <div>
+            <div id="chatRoom" style="
+                border: 1px solid black;
+                width: 25%;
+                display: inline-block;
+                height: 150px;
+                overflow: scroll;
+            "></div>
+            <div id="ConnectionStatus" style="
+                border: 1px solid black;
+                width: 25%;
+                display: inline-block;
+                height: 150px;
+                overflow: scroll;
+            "></div>
+        </div>
+
+        <script>
+            var ConnectionStatus = document.getElementById('ConnectionStatus');
+            var socket = new WebSocket("ws://localhost:5001");
+            var log = document.getElementById('chatRoom');
+            socket.onopen = function(event) {
+                console.log(event);
+                if (event.type == "open") {
+                    ConnectionStatus.innerHTML += "Socket Connection established..!! "+ "<br>";
+                }
+            }
+
+            socket.onmessage = function(event) {
+                if (!isNaN(event.data)) {
+                    ConnectionStatus.innerHTML += "Connected devices: " + event.data + "<br>";
+                } else {
+                    log.innerHTML += event.data + "<br>";
+                }
+            }
+
+            document.querySelector('button').onclick = function() {
+                var texting = document.getElementById('text').value;
+                socket.send(texting);
+                document.getElementById('text').value = "";
+            }
+        </script>
+    </body>
+</html>
