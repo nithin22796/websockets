@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <title>Websocket Implementation in table</title>
+    </head>
+    <body>
+        <table id="tableId" style="
+            width: 50%;
+            border: solid;
+            margin-left: 25%;
+        ">
+            <tr>
+                <td>1</td>
+                <td>123.9</td>
+                <td>123</td>
+            </tr>
+        </table>
+        <div style="
+            margin-top: 100px;
+        ">
+            <input type="number" placeholder="Row number" id="rowCount">
+            <input type="number" placeholder="Value1" id="columnValue1">
+            <input type="number" placeholder="Value2" id="columnValue2">
+            <button>Submit</button>
+        </div>
+
+
+        <script>
+            var socket = new WebSocket("ws://localhost:5001");
+            var tableBody = document.getElementById('tableId');
+            socket.onopen = function() {
+                console.log("Socket connected");
+            }
+
+            socket.onmessage = function(event) {
+                console.log(event.data);
+                var json = JSON.parse(event.data);
+                var keys = Object.values(json);
+                var key = keys[0];
+                for (var i = 0; i < tableBody.rows.length; i++) {
+                    if (key == tableBody.rows[i].cells[0].innerHTML) {
+                        tableBody.rows[i].cells[1].innerHTML = keys[1];
+                        tableBody.rows[i].cells[2].innerHTML = keys[2];
+                        return;
+                    }
+                }
+                var tr = document.createElement('tr');
+                for (var i = 0; i < keys.length; i++) {
+                    var td = document.createElement('td');
+                    var text = document.createTextNode(keys[i]);
+                    td.appendChild(text);
+                    tr.appendChild(td);
+                }
+                tableBody.appendChild(tr);
+            }
+
+            document.querySelector('button').onclick = function() {
+                var replaceId = document.getElementById('rowCount').value;
+                var valueToReplace1 = document.getElementById('columnValue1').value;
+                var valueToReplace2 = document.getElementById('columnValue2').value;
+                var data = {
+                    id: replaceId,
+                    data1: valueToReplace1,
+                    data2: valueToReplace2
+                }
+
+                socket.send(JSON.stringify(data));
+            }
+        </script>
+    </body>
+</html>
